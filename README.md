@@ -2,7 +2,7 @@
 # Rinha de backend 2024 q1
 
 
-![images do relatorio do gatling]([https://github.com/Edmar-Sousa/kanban/blob/master/readme.gif](https://github.com/Edmar-Sousa/rinha-backend-2024q1/blob/master/images/RinhaBackendCreditos.png))
+![images do relatorio do gatling](https://github.com/Edmar-Sousa/rinha-backend-2024q1/blob/master/images/RinhaBackendCreditos.png)
 
 ## Tecnologias
  - PHP
