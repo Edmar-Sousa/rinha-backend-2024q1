@@ -5,10 +5,6 @@ ENV timezone="America/Sao_Paulo"
 
 
 RUN set -ex \
-    && php -v \
-    && php -m \
-    && php --ri swoole \
-
     # define the docker timezone
     && ln -sf /usr/share/zoneinfo/${timezone} /etc/localtime \
     && echo "${timezone}" > /etc/timezone
@@ -22,11 +18,12 @@ WORKDIR /api
 
 COPY . .
 
-RUN composer install
+RUN composer install --prefer-dist --no-dev --optimize-autoloader
 
 
 EXPOSE 9501
 
 
-CMD [ "php", "bin/hyperf.php", "start" ]
+ENTRYPOINT [ "php", "/api/bin/hyperf.php" ]
 
+CMD [ "start" ]
