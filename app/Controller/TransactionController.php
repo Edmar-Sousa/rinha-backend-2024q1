@@ -5,20 +5,42 @@ namespace App\Controller;
 
 use Hyperf\HttpServer\Contract\ResponseInterface;
 use Hyperf\HttpServer\Contract\RequestInterface;
+use Hyperf\Validation\Contract\ValidatorFactoryInterface;
 
 use Hyperf\DbConnection\Db;
 
-use App\Request\TransactionRequest;
 use Carbon\Carbon;
 
 class TransactionController extends AbstractController
 {
 
+    protected ValidatorFactoryInterface $validationFactory;
 
-    public function index(TransactionRequest $request, ResponseInterface $response)
+
+    public function __construct(ValidatorFactoryInterface $validationFactory)
+    {
+        $this->validationFactory = $validationFactory;
+    }
+
+
+    public function index(RequestInterface $request, ResponseInterface $response)
     {
 
         $transactionData = $request->all();
+
+        $validator = $this->validationFactory->make( 
+            $request->all(), 
+            [
+                'valor' => 'required|integer',
+                'tipo'  => 'required|in:c,d',
+                'descricao' => 'required|string|min:1|max:10',
+            ]);
+
+
+        if ($validator->fails())
+            return $response->withStatus(422);
+
+        
         $clientId = $request->route('id');
 
         $client = Db::table('clients')
@@ -34,10 +56,7 @@ class TransactionController extends AbstractController
             $client->balance + $transactionData['valor'];
 
 
-        if ($transactionData['tipo'] == 'd' && $beforeBalance < -$client->limit)
-            return $response->withStatus(422);
-        
-        else if ($transactionData['tipo'] == 'c' && $beforeBalance > $client->limit)
+        if ($beforeBalance < -$client->limit || $beforeBalance > $client->limit)
             return $response->withStatus(422);
 
 
