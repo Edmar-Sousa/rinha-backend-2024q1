@@ -56,27 +56,46 @@ class TransactionController extends AbstractController
             $client->balance + $transactionData['valor'];
 
 
-        if ($beforeBalance < -$client->limit || $beforeBalance > $client->limit)
+        if (abs($beforeBalance) > $client->limit)
             return $response->withStatus(422);
 
 
-        Db::beginTransaction();
+        Db::transaction(function () use ($clientId, $beforeBalance, $transactionData) {
+            Db::statement("LOCK TABLE clients IN ROW EXCLUSIVE MODE");
 
-        Db::table('transactions')
-            ->insert([
-                'value' => $transactionData['valor'],
-                'type'  => $transactionData['tipo'],
-                'description' => $transactionData['descricao'],
-                'client_id'   => $clientId,
+            Db::select("
+                SELECT
+                    *
+                FROM clients 
+                WHERE 
+                    id = ? 
+                FOR UPDATE", [ $clientId ]);
+
+            Db::statement(<<<UPDATEBALANCE
+                UPDATE 
+                    clients
+                SET balance = ?
+                WHERE 
+                    id = ?
+            UPDATEBALANCE, [ $beforeBalance, $clientId ]);
+
+            Db::statement(<<<INSERTSQL
+                INSERT INTO transactions(
+                    value,
+                    type,
+                    description,
+                    client_id
+                ) 
+                VALUES ( ?, ?, ?, ? )
+            INSERTSQL, [ 
+                $transactionData['valor'], 
+                $transactionData['tipo'], 
+                $transactionData['descricao'], 
+                $clientId
             ]);
 
-        Db::table('clients')
-            ->where('id', $clientId)
-            ->update([
-                'balance' => $beforeBalance
-            ]);
+        });
 
-        Db::commit();
 
         return [
             'limite' => $client->limit,
