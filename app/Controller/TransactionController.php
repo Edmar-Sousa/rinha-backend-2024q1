@@ -122,7 +122,7 @@ class TransactionController extends AbstractController
                 'created_at',
             ])
             ->orderByDesc('created_at')
-            ->limit(5)
+            ->limit(10)
             ->get();
 
         $transactionsClient = [];
@@ -133,7 +133,7 @@ class TransactionController extends AbstractController
                 'valor' => $transaction->value,
                 'tipo' => $transaction->type,
                 'descricao' => $transaction->description,
-                'realizada_em' => $transaction->created_at
+                'realizada_em' => Carbon::parse($transaction->created_at)->toISOString(),
             ];
         }
         
