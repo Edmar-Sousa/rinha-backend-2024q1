@@ -34,7 +34,7 @@ services:
       resources:
         limits:
           cpus: "0.4"
-          memory: "170MB"
+          memory: "165MB"
 
   rinha-api-02:
     <<: *api
@@ -65,8 +65,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.6"
-          memory: "190MB"
+          cpus: "0.5"
+          memory: "200MB"
 
   nginx:
     image: nginx:latest
@@ -85,8 +85,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.1"
-          memory: "10MB"
+          cpus: "0.2"
+          memory: "20MB"
 
 networks:
   default:
